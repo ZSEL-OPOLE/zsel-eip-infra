@@ -255,8 +255,15 @@ function New-PullRequest {
     Push-Location $TargetPath
     try {
         # Stage all changes
-        git add .
+        git add . 2>&1 | Out-Null
         
+        # Check if there are changes
+        $status = git status --porcelain
+        if (-not $status) {
+            Write-ColorOutput "  ℹ No changes to commit" -Color Yellow
+            return $null
+        }
+
         # Commit with descriptive message
         $commitMsg = @"
 feat(security): deploy security framework
@@ -406,6 +413,10 @@ finally {
 # Get files to copy
 $filesToCopy = Get-SecurityFrameworkFiles -RepoType $RepoType
 
+# Create branch FIRST (before any changes!)
+$branchName = "security/deploy-framework-$(Get-Date -Format 'yyyyMMdd')"
+$branch = New-SecurityBranch -TargetPath $targetRepoPath -BranchName $branchName
+
 # Copy framework files
 Copy-FrameworkFiles -SourcePath $sourceRepoPath -TargetPath $targetRepoPath -Files $filesToCopy
 
@@ -415,10 +426,7 @@ Adjust-ForRepoType -TargetPath $targetRepoPath -RepoType $RepoType -RepoName $Ta
 # Update README
 Update-README -TargetPath $targetRepoPath -RepoName $TargetRepo
 
-# Create branch and PR
-$branchName = "security/deploy-framework-$(Get-Date -Format 'yyyyMMdd')"
-$branch = New-SecurityBranch -TargetPath $targetRepoPath -BranchName $branchName
-
+# Create PR
 if ($CreatePR) {
     $pr = New-PullRequest -TargetPath $targetRepoPath -RepoName $TargetRepo -BranchName $branchName
 
