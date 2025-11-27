@@ -388,6 +388,75 @@ ansible-playbook → 56 devices
 
 ---
 
-**Last updated:** 2025-11-27
-**PFU Compliance:** ✅ 2.7
+---
+
+## 🚀 Organization-Wide Security Rollout
+
+**Status:** 1/25 repositories secured (4% complete)
+
+### 📊 Current State
+```
+█░░░░░░░░░░░░░░░░░░░░ 4% (1/25 repos)
+```
+
+**Completed:** zsel-eip-infra ✅  
+**Pending:** 24 repositories (see [STATUS.md](STATUS.md))
+
+### 📚 Rollout Documentation
+
+| Document | Purpose | Lines |
+|----------|---------|-------|
+| **[STATUS.md](STATUS.md)** | Current deployment status & metrics | 240+ |
+| **[QUICK-START.md](QUICK-START.md)** | 3-command deployment guide | 320+ |
+| **[ROLLOUT-PLAN.md](ROLLOUT-PLAN.md)** | Complete 4-phase rollout strategy | 350+ |
+| **[DEPLOYMENT-STATUS.md](DEPLOYMENT-STATUS.md)** | Initial deployment report | 280+ |
+
+### 🎯 Quick Deploy (All Remaining 24 Repos)
+
+```powershell
+# Navigate to scripts
+cd c:\Users\kolod\Desktop\LKP\05_BCU\INFRA\zsel-eip-infra\scripts
+
+# Phase 1: Deploy to 6 core repos (Week 1)
+.\Deploy-Batch.ps1 -Phase 1
+
+# Phase 2: Deploy to 17 Terraform modules (Week 2)
+.\Deploy-Batch.ps1 -Phase 2
+
+# Phase 3: Configure .github org repo (Week 2)
+# Manual configuration needed
+
+# Phase 4: Deploy self-hosted K8s runners (Week 3)
+# See ROLLOUT-PLAN.md Phase 4
+```
+
+### 📋 3-Week Timeline
+
+**Week 1** (Phase 1): Core repos (gitops, network, ansible, dokumentacja, opole, opole-ad)  
+**Week 2** (Phase 2-3): Terraform modules (17) + org config  
+**Week 3** (Phase 4): Self-hosted runners on Kubernetes cluster  
+
+**Total time:** ~40 hours (can parallelize to ~10 hours)
+
+### 🔒 No Exceptions Policy
+
+After Phase 1 testing, **ALL users** (including admins) must:
+- ✅ Create PRs (NO direct push to main)
+- ✅ Get 1 code owner approval
+- ✅ Pass all CI/CD checks (18 jobs)
+- ✅ Resolve all conversations
+
+**Setting:** `enforce_admins: true` (will be enabled after Week 1)
+
+### 🎯 Project Tracking
+
+All rollout progress tracked in:  
+**[GitHub Project #2 - Security Framework Rollout](https://github.com/orgs/ZSEL-OPOLE/projects/2)**
+
+---
+
+**Last updated:** 2025-01-19  
+**Security framework:** ✅ Production-ready  
+**Rollout status:** 1/25 repos (4%)  
+**PFU Compliance:** ✅ 2.7  
 **VLANs:** 29 (15 pracownie + 4 dydaktyczne + 10 infrastruktury)
