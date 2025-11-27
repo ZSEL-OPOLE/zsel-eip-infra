@@ -2,6 +2,10 @@
 
 Infrastructure as Code - Terraform configuration with YAML-driven generator
 
+> **🔐 Security:** This repository implements comprehensive security controls. See [SECURITY-SETUP.md](SECURITY-SETUP.md)  
+> **🤝 Contributing:** Read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting PRs  
+> **🛡️ Security Policy:** Report vulnerabilities via [SECURITY.md](SECURITY.md)
+
 ## 📋 Overview
 
 Centralized configuration management for ZSEL Opole network infrastructure:
@@ -62,6 +66,129 @@ terraform validate
 # Plan deployment
 terraform plan
 ```
+
+---
+
+## 🔒 Security & Code Quality
+
+This repository implements **enterprise-grade security** with 4-layer defense architecture:
+
+| Layer | Enforcement Point | Tools | When It Runs |
+|-------|------------------|-------|--------------|
+| **1. Local** | Pre-commit hooks | 30+ checks (secrets, syntax, style) | Before `git commit` |
+| **2. CI/CD** | GitHub Actions | 18 automated jobs | On PR & push |
+| **3. Branch** | Protection rules | Required reviews + passing checks | Before merge |
+| **4. Organization** | GitHub policies | Global defaults | Always |
+
+### 🚀 Quick Security Setup (10 minutes)
+
+```powershell
+# 1. Install pre-commit framework
+pip install pre-commit
+
+# 2. Install hooks (one-time)
+cd C:\Users\kolod\Desktop\LKP\05_BCU\INFRA\zsel-eip-infra
+pre-commit install
+pre-commit install --hook-type commit-msg
+
+# 3. Test installation
+pre-commit run --all-files
+
+# ✅ Done! All commits now automatically validated
+```
+
+### 📚 Security Documentation
+
+- **[SECURITY-SETUP.md](SECURITY-SETUP.md)** - Complete setup guide with verification tests
+- **[SECURITY.md](SECURITY.md)** - Security policy & vulnerability reporting process
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development workflow & code standards
+- **[CODEOWNERS](CODEOWNERS)** - Automatic PR reviewer assignment
+
+### 🛡️ What Gets Checked
+
+**Secret Scanning:**
+- Hardcoded passwords, API keys, tokens
+- AWS credentials, private keys
+- RouterOS passwords, connection strings
+
+**Code Security:**
+- PowerShell: PSScriptAnalyzer, credential detection
+- Python: Bandit (security), Safety (vulnerabilities)
+- Terraform: TFSec, Checkov, TFLint
+
+**Code Quality:**
+- Python: Black (formatting), Flake8 (linting), Pylint (quality)
+- YAML: yamllint, schema validation
+- Markdown: markdownlint, broken link check
+
+**Repository Hygiene:**
+- File size limits (10MB max)
+- Merge conflict detection
+- Trailing whitespace, line endings
+- Commit message conventions
+
+### ⚠️ Before Your First Commit
+
+1. **Read the guides:**
+   - [CONTRIBUTING.md](CONTRIBUTING.md) - How to contribute
+   - [SECURITY.md](SECURITY.md) - Security requirements
+
+2. **Install tools:**
+   ```powershell
+   # Pre-commit framework
+   pip install pre-commit
+   
+   # PowerShell (if editing .ps1 files)
+   Install-Module -Name PSScriptAnalyzer -Scope CurrentUser
+   
+   # Python (if editing .py files)
+   pip install black flake8 pylint bandit
+   
+   # Terraform (if editing .tf files)
+   choco install tflint terraform-docs
+   ```
+
+3. **Configure Git:**
+   ```powershell
+   # Set commit signature (optional but recommended)
+   git config user.name "Your Name"
+   git config user.email "your.email@zsel.opole.pl"
+   
+   # Enable GPG signing (optional)
+   git config commit.gpgsign true
+   ```
+
+4. **Test your setup:**
+   ```powershell
+   # Create test file with intentional issue
+   echo "password = 'admin123'" > test.txt
+   git add test.txt
+   git commit -m "test: verify pre-commit hooks"
+   
+   # ✅ Should BLOCK commit with secret detection error
+   rm test.txt
+   ```
+
+### 🔐 Security Features
+
+- ✅ **Secret scanning** - TruffleHog, GitLeaks, detect-secrets
+- ✅ **Dependency scanning** - Dependabot, Safety (Python)
+- ✅ **Code analysis** - PSScriptAnalyzer, Bandit, TFSec
+- ✅ **Vulnerability reporting** - Private email channel
+- ✅ **Branch protection** - Required reviews + status checks
+- ✅ **Automated testing** - Pester (PowerShell), pytest (Python)
+- ✅ **Code owners** - Automatic reviewer assignment
+- ✅ **Issue templates** - Standardized bug/feature/security reports
+- ✅ **PR templates** - 50+ item checklist
+
+### 📊 Security Monitoring
+
+GitHub Actions run automatically on:
+- Every push to `main` or `develop`
+- Every pull request
+- Daily at 2:00 AM UTC (security scans)
+
+View results: [Actions tab](../../actions)
 
 ---
 
