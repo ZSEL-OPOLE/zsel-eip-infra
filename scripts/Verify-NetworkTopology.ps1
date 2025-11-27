@@ -38,7 +38,7 @@
 [CmdletBinding()]
 param(
     [string]$Username = "admin",
-    [string]$Password = "ZSE-BCU-2025!SecureP@ss",
+    [SecureString]$Password = (ConvertTo-SecureString "ZSE-BCU-2025!SecureP@ss" -AsPlainText -Force),
     [string]$ExpectedTopologyFile = "$PSScriptRoot\expected-topology.json",
     [string]$ExportReport = ""
 )
@@ -88,12 +88,11 @@ function Connect-MikroTik {
     param(
         [string]$IP,
         [string]$Username,
-        [string]$Password
+        [SecureString]$Password
     )
     
     try {
-        $securePassword = ConvertTo-SecureString $Password -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential($Username, $securePassword)
+        $credential = New-Object System.Management.Automation.PSCredential($Username, $Password)
         
         $session = New-SSHSession -ComputerName $IP -Credential $credential -AcceptKey -ErrorAction Stop
         return $session
@@ -130,7 +129,7 @@ function Invoke-MikroTikCommand {
     }
 }
 
-function Get-LLDPNeighbors {
+function Get-LLDPNeighbor {
     param(
         [object]$Session
     )
@@ -215,7 +214,7 @@ function Test-Connectivity {
     return $ping
 }
 
-function Load-ExpectedTopology {
+function Import-ExpectedTopology {
     param(
         [string]$FilePath
     )
@@ -550,7 +549,7 @@ Write-Host ""
 
 # Step 2: Load expected topology
 Write-ColorOutput "[2/5] Wczytywanie oczekiwanej topologii..." -Color Yellow
-$expectedTopology = Load-ExpectedTopology -FilePath $ExpectedTopologyFile
+$expectedTopology = Import-ExpectedTopology -FilePath $ExpectedTopologyFile
 Write-ColorOutput "✓ Topologia wczytana ($(($expectedTopology.Keys | ForEach-Object { $expectedTopology[$_].Count } | Measure-Object -Sum).Sum) oczekiwanych połączeń)" -Color Green
 Write-Host ""
 
@@ -596,7 +595,7 @@ foreach ($switch in $switches | Where-Object { ($connectivityResults | Where-Obj
         $sessions[$switch.Name] = $session
         
         Write-ColorOutput "  Collecting LLDP neighbors from $($switch.Name)... " -NoNewline
-        $neighbors = Get-LLDPNeighbors -Session $session
+        $neighbors = Get-LLDPNeighbor -Session $session
         $actualTopology[$switch.Name] = $neighbors
         Write-ColorOutput "✓ ($($neighbors.Count) neighbors)" -Color Green
     }

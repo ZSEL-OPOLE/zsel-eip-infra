@@ -1,8 +1,7 @@
-# ═══════════════════════════════════════════════════════════════
-# MikroTik RouterOS Configuration Files - README
-# Project: BCU ZSE Opole - Network Infrastructure
-# Date: 2025-11-27
-# ═══════════════════════════════════════════════════════════════
+# MikroTik RouterOS Configuration Files
+
+**Project:** BCU ZSE Opole - Network Infrastructure  
+**Date:** 2025-11-27
 
 > **🔥 NOWOŚĆ:** Automatyczna weryfikacja topologii!  
 > Zobacz: [AUTOMATION-TOPOLOGY-VERIFICATION.md](../AUTOMATION-TOPOLOGY-VERIFICATION.md)
