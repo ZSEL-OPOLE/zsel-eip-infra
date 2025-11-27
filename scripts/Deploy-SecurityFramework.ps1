@@ -340,18 +340,28 @@ This PR deploys the organization-wide security framework to this repository.
 **No action required from maintainers** - Framework is pre-configured
 "@
 
-        $pr = gh pr create `
+        $prUrl = gh pr create `
             --title "🔒 Deploy Security Framework" `
             --body $prBody `
             --base main `
             --head $BranchName `
-            --label "security,infrastructure" `
-            --assignee "@me" | ConvertFrom-Json
+            --label "infrastructure" `
+            --assignee "@me"
 
-        Write-ColorOutput "  ✅ Pull Request created!" -Color Green
-        Write-ColorOutput "  🔗 URL: $($pr.url)" -Color Cyan
-        
-        return $pr
+        if ($LASTEXITCODE -eq 0) {
+            Write-ColorOutput "  ✅ Pull Request created!" -Color Green
+            Write-ColorOutput "  🔗 URL: $prUrl" -Color Cyan
+            
+            # Return PR object
+            return @{
+                url = $prUrl
+                number = ($prUrl -split '/')[-1]
+            }
+        }
+        else {
+            Write-ColorOutput "  ❌ Failed to create PR" -Color Red
+            return $null
+        }
     }
     catch {
         Write-ColorOutput "  ❌ Failed to create PR: $_" -Color Red
