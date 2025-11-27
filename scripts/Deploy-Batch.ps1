@@ -82,6 +82,7 @@ function Write-ColorOutput {
 }
 
 function New-GitHubIssue {
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [string]$RepoName,
         [string]$RepoType,

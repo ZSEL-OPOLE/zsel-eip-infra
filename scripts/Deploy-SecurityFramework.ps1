@@ -127,7 +127,7 @@ function Copy-FrameworkFiles {
     }
 }
 
-function Adjust-ForRepoType {
+function Update-ForRepoType {
     param(
         [string]$TargetPath,
         [string]$RepoType,
@@ -170,6 +170,7 @@ function Adjust-ForRepoType {
 }
 
 function Update-README {
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [string]$TargetPath,
         [string]$RepoName
@@ -219,6 +220,7 @@ pre-commit install
 }
 
 function New-SecurityBranch {
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [string]$TargetPath,
         [string]$BranchName = "security/deploy-framework"
