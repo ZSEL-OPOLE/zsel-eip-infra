@@ -14,6 +14,10 @@ permissions:
   security-events: write
   pull-requests: write
 
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true  # Cancel old runs, save minutes
+
 jobs:
   # ═══════════════════════════════════════════════════════════════
   # SECRET SCANNING
@@ -21,11 +25,12 @@ jobs:
   secret-scanning:
     name: Secret Detection
     runs-on: ubuntu-latest
+    if: github.event_name != 'schedule' || github.repository == 'ZSEL-OPOLE/zsel-eip-infra'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for better detection
+          fetch-depth: 1  # Shallow clone unless scheduled scan
 
       - name: TruffleHog Secret Scanner
         uses: trufflesecurity/trufflehog@main

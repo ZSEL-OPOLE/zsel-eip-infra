@@ -10,6 +10,10 @@ permissions:
   pull-requests: write
   issues: write
 
+concurrency:
+  group: copilot-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true  # Cancel old runs when new push
+
 jobs:
   copilot-review:
     runs-on: ubuntu-latest
@@ -21,7 +25,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1  # Shallow clone - faster, saves time
       
       - name: Get PR diff
         id: pr-diff
