@@ -73,6 +73,11 @@ jobs:
       github.event.pull_request.base.ref == 'develop' &&
       !contains(github.event.pull_request.labels.*.name, 'needs-human-review')
     
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -140,7 +145,7 @@ jobs:
         if: steps.check-eligibility.outputs.eligible == 'true'
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.COPILOT_APPROVE_TOKEN }}  # Osobny token z write permissions
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # Use default token
           script: |
             await github.rest.pulls.createReview({
               owner: context.repo.owner,
