@@ -11,6 +11,11 @@ secrets.yaml
 backups/
 *.bak
 *.backup
+*-backup
+*OLD*
+*WRONG*
+*-old-*
+*-generated.auto.tfvars
 
 # Logs
 *.log

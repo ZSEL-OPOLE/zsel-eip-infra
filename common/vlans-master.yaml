@@ -1,0 +1,521 @@
+# =============================================================================
+# VLANS MASTER CONFIGURATION - PFU 2.7 COMPLIANT
+# =============================================================================
+# Single Source of Truth for ZSE Opole Network Configuration
+# Based on: zsel-eip-dokumentacja/architektura/pfu.md
+# Based on: zsel-eip-network/configs/PFU-2.7-COMPLIANCE.md
+# =============================================================================
+
+vlans:
+  # === SALE DYDAKTYCZNE (Teaching Classrooms) - VLAN 101-104 ===
+  dydactic:
+    P0:  # Parter
+      vlan_id: 101
+      subnet: "192.168.1.0/24"
+      gateway: "192.168.1.1"
+      dhcp_pool: "192.168.1.51-192.168.1.250"  # 200 IP (80%)
+      lease_time: "8h"
+      rooms: [5, 6, "6A"]  # Sale z pojedynczym gniazdem RJ45 nauczyciela
+      description: "Parter - Sale dydaktyczne"
+    
+    P1:  # Piętro 1
+      vlan_id: 102
+      subnet: "192.168.2.0/24"
+      gateway: "192.168.2.1"
+      dhcp_pool: "192.168.2.51-192.168.2.250"
+      lease_time: "8h"
+      rooms: [11, 12, 15, 16, 17, 19, 20, 21, 22]
+      description: "Piętro I - Sale dydaktyczne"
+    
+    P2:  # Piętro 2
+      vlan_id: 103
+      subnet: "192.168.3.0/24"
+      gateway: "192.168.3.1"
+      dhcp_pool: "192.168.3.51-192.168.3.250"
+      lease_time: "8h"
+      rooms: [38, 39, 40]
+      description: "Piętro II - Sale dydaktyczne"
+    
+    P3:  # Piętro 3
+      vlan_id: 104
+      subnet: "192.168.4.0/24"
+      gateway: "192.168.4.1"
+      dhcp_pool: "192.168.4.51-192.168.4.250"
+      lease_time: "8h"
+      rooms: [45, 47, 48, 49, 50, 51, 52, 53, 55]  # Samorząd 55
+      description: "Piętro III - Sale dydaktyczne + Samorząd"
+
+  # === PRACOWNIE UCZNIOWSKIE (Labs) - VLAN 208-246 ===
+  # Adresacja: 10.[NR_SALI].0.0/16
+  # QoS: 60 Mbps (burst 80 Mbps)
+  labs:
+    - sala: 8
+      vlan_id: 208
+      subnet: "10.8.0.0/16"
+      gateway: "10.8.0.1"
+      dhcp_pool: "10.8.1.51-10.8.254.254"  # ~64k IP (80% z /16)
+      lease_time: "4h"
+      floor: "P0"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P0-08"
+      description: "Pracownia 8 - Parter"
+    
+    - sala: 9
+      vlan_id: 209
+      subnet: "10.9.0.0/16"
+      gateway: "10.9.0.1"
+      dhcp_pool: "10.9.1.51-10.9.254.254"
+      lease_time: "4h"
+      floor: "P0"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P0-09"
+      description: "Pracownia 9 - Parter"
+    
+    - sala: 23
+      vlan_id: 223
+      subnet: "10.23.0.0/16"
+      gateway: "10.23.0.1"
+      dhcp_pool: "10.23.1.51-10.23.254.254"
+      lease_time: "4h"
+      floor: "P1"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P1-23"
+      description: "Pracownia 23 - Piętro I"
+    
+    - sala: 24
+      vlan_id: 224
+      subnet: "10.24.0.0/16"
+      gateway: "10.24.0.1"
+      dhcp_pool: "10.24.1.51-10.24.254.254"
+      lease_time: "4h"
+      floor: "P1"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P1-24"
+      description: "Pracownia 24 - Piętro I"
+    
+    - sala: 25
+      vlan_id: 225
+      subnet: "10.25.0.0/16"
+      gateway: "10.25.0.1"
+      dhcp_pool: "10.25.1.51-10.25.254.254"
+      lease_time: "4h"
+      floor: "P1"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P1-25"
+      description: "Pracownia 25 - Piętro I"
+    
+    - sala: 26
+      vlan_id: 226
+      subnet: "10.26.0.0/16"
+      gateway: "10.26.0.1"
+      dhcp_pool: "10.26.1.51-10.26.254.254"
+      lease_time: "4h"
+      floor: "P2"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P2-26"
+      description: "Pracownia 26 - Piętro II"
+    
+    - sala: 27
+      vlan_id: 227
+      subnet: "10.27.0.0/16"
+      gateway: "10.27.0.1"
+      dhcp_pool: "10.27.1.51-10.27.254.254"
+      lease_time: "4h"
+      floor: "P2"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P2-27"
+      description: "Pracownia 27 - Piętro II"
+    
+    - sala: 28
+      vlan_id: 228
+      subnet: "10.28.0.0/16"
+      gateway: "10.28.0.1"
+      dhcp_pool: "10.28.1.51-10.28.254.254"
+      lease_time: "4h"
+      floor: "P2"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P2-28"
+      description: "Pracownia 28 - Piętro II"
+    
+    - sala: 30
+      vlan_id: 230
+      subnet: "10.30.0.0/16"
+      gateway: "10.30.0.1"
+      dhcp_pool: "10.30.1.51-10.30.254.254"
+      lease_time: "4h"
+      floor: "P2"
+      type: "fixed"
+      ports: 20
+      kpd: "KPD-P2-30"
+      description: "Pracownia 30 - Piętro II (20 portów)"
+    
+    - sala: 31
+      vlan_id: 231
+      subnet: "10.31.0.0/16"
+      gateway: "10.31.0.1"
+      dhcp_pool: "10.31.1.51-10.31.254.254"
+      lease_time: "4h"
+      floor: "P2"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P2-31"
+      description: "Pracownia 31 - Piętro II"
+    
+    - sala: 41
+      vlan_id: 241
+      subnet: "10.41.0.0/16"
+      gateway: "10.41.0.1"
+      dhcp_pool: "10.41.1.51-10.41.254.254"
+      lease_time: "4h"
+      floor: "P3"
+      type: "mobile"
+      ports: 18
+      kpd: "KPD-P3-41"
+      description: "Pracownia Mobilna 41 - Piętro III"
+    
+    - sala: 42
+      vlan_id: 242
+      subnet: "10.42.0.0/16"
+      gateway: "10.42.0.1"
+      dhcp_pool: "10.42.1.51-10.42.254.254"
+      lease_time: "4h"
+      floor: "P3"
+      type: "fixed"
+      ports: 32
+      kpd: "KPD-P3-42"
+      description: "Pracownia 42 - Piętro III"
+    
+    - sala: 43
+      vlan_id: 243
+      subnet: "10.43.0.0/16"
+      gateway: "10.43.0.1"
+      dhcp_pool: "10.43.1.51-10.43.254.254"
+      lease_time: "4h"
+      floor: "P3"
+      type: "mobile"
+      ports: 18
+      kpd: "KPD-P3-43"
+      description: "Pracownia Mobilna 43 - Piętro III"
+    
+    - sala: 44
+      vlan_id: 244
+      subnet: "10.44.0.0/16"
+      gateway: "10.44.0.1"
+      dhcp_pool: "10.44.1.51-10.44.254.254"
+      lease_time: "4h"
+      floor: "P3"
+      type: "mobile"
+      ports: 18
+      kpd: "KPD-P3-44"
+      description: "Pracownia Mobilna 44 - Piętro III"
+    
+    - sala: 46
+      vlan_id: 246
+      subnet: "10.46.0.0/16"
+      gateway: "10.46.0.1"
+      dhcp_pool: "10.46.1.51-10.46.254.254"
+      lease_time: "4h"
+      floor: "P3"
+      type: "mobile"
+      ports: 18
+      kpd: "KPD-P3-46"
+      description: "Pracownia Mobilna 46 - Piętro III"
+
+  # === TELEWIZORY INFORMACYJNE - VLAN 110 ===
+  tv:
+    vlan_id: 110
+    subnet: "192.168.10.0/24"
+    gateway: "192.168.10.1"
+    dhcp_pool: "192.168.10.51-192.168.10.250"
+    lease_time: "24h"
+    description: "Telewizory informacyjne (korytarze)"
+
+  # === WIFI UCZNIOWSKA - VLAN 300-303 ===
+  wifi:
+    - floor: "P0"
+      vlan_id: 300
+      subnet: "10.100.1.0/24"
+      gateway: "10.100.1.1"
+      dhcp_pool: "10.100.1.51-10.100.1.250"
+      lease_time: "2h"
+      ssid: "ZSE_Student"
+      description: "WiFi uczniowska - Parter"
+    
+    - floor: "P1"
+      vlan_id: 301
+      subnet: "10.100.2.0/24"
+      gateway: "10.100.2.1"
+      dhcp_pool: "10.100.2.51-10.100.2.250"
+      lease_time: "2h"
+      ssid: "ZSE_Student"
+      description: "WiFi uczniowska - Piętro I"
+    
+    - floor: "P2"
+      vlan_id: 302
+      subnet: "10.100.3.0/24"
+      gateway: "10.100.3.1"
+      dhcp_pool: "10.100.3.51-10.100.3.250"
+      lease_time: "2h"
+      ssid: "ZSE_Student"
+      description: "WiFi uczniowska - Piętro II"
+    
+    - floor: "P3"
+      vlan_id: 303
+      subnet: "10.100.4.0/24"
+      gateway: "10.100.4.1"
+      dhcp_pool: "10.100.4.51-10.100.4.250"
+      lease_time: "2h"
+      ssid: "ZSE_Student"
+      description: "WiFi uczniowska - Piętro III"
+
+  # === SERWERY UCZNIOWSKIE - VLAN 400-401 ===
+  servers:
+    - vlan_id: 400
+      subnet: "10.200.100.0/24"
+      gateway: "10.200.100.1"
+      dhcp_pool: "10.200.100.51-10.200.100.250"
+      description: "Serwery uczniowskie - pool 1"
+    
+    - vlan_id: 401
+      subnet: "10.200.200.0/24"
+      gateway: "10.200.200.1"
+      dhcp_pool: "10.200.200.51-10.200.200.250"
+      description: "Serwery uczniowskie - pool 2"
+
+  # === SIEĆ ADMINISTRACYJNA - VLAN 500 ===
+  admin:
+    vlan_id: 500
+    subnet: "172.20.20.0/24"
+    gateway: "172.20.20.1"
+    dhcp_pool: "172.20.20.51-172.20.20.250"
+    description: "Sieć administracyjna (Portiernia, Archiwum, Administracja, Sklepik, Sale 18, 32-37)"
+
+  # === KAMERY CCTV - VLAN 501 ===
+  cctv:
+    vlan_id: 501
+    subnet: "172.21.1.0/24"
+    gateway: "172.21.1.1"
+    dhcp_pool: "172.21.1.51-172.21.1.250"
+    description: "Kamery monitoringu (48× K/)"
+
+  # === ZARZĄDZANIE INFRASTRUKTURĄ - VLAN 600 ===
+  management:
+    vlan_id: 600
+    subnet: "192.168.255.0/28"
+    gateway: "192.168.255.1"
+    dhcp_enabled: false
+    description: "Zarządzanie infrastrukturą (tylko static IP)"
+
+# =============================================================================
+# QoS POLICIES - PFU 2.7 REQUIREMENTS
+# =============================================================================
+qos_policies:
+  labs:
+    max_limit: "60M/60M"
+    burst_limit: "80M/80M"
+    burst_threshold: "50M/50M"
+    burst_time: "30s"
+    priority: 3
+    comment: "PFU 2.7 - Pracownie uczniowskie - 60 Mbps + burst 80 Mbps"
+  
+  dydactic:
+    max_limit: "1000M/1000M"
+    priority: 2
+    comment: "PFU 2.7 - Sale dydaktyczne - 1000 Mbps per piętro"
+  
+  wifi:
+    max_limit: "200M/200M"
+    priority: 1
+    comment: "PFU 2.7 - WiFi uczniowska - 200 Mbps per piętro (niski priorytet dla download)"
+  
+  admin:
+    max_limit: "unlimited"
+    priority: 5
+    comment: "Sieć administracyjna - nieograniczona"
+  
+  management:
+    max_limit: "unlimited"
+    priority: 7
+    comment: "Zarządzanie infrastrukturą - najwyższy priorytet"
+  
+  cctv:
+    max_limit: "100M/100M"
+    priority: 4
+    comment: "Kamery CCTV - 100 Mbps"
+
+# =============================================================================
+# FIREWALL RULES
+# =============================================================================
+firewall_rules:
+  management_access:
+    - action: "accept"
+      src: "192.168.255.0/28"
+      dst: "any"
+      comment: "Management VLAN ma dostęp wszędzie"
+  
+  block_labs_to_admin:
+    - action: "drop"
+      src: "10.0.0.0/8"  # Wszystkie pracownie (10.8-10.46)
+      dst: "172.20.20.0/24"
+      comment: "Blokada pracowni → admin"
+    
+    - action: "drop"
+      src: "10.0.0.0/8"
+      dst: "192.168.255.0/28"
+      comment: "Blokada pracowni → management"
+  
+  wifi_restrictions:
+    - action: "drop"
+      src: "10.100.0.0/22"
+      dst_port: "25"
+      protocol: "tcp"
+      comment: "WiFi - blokada SMTP outbound"
+  
+  exam_mode:
+    enabled: false
+    target_vlans: [208, 209, 223, 224, 225, 226, 227, 228, 230, 231, 241, 242, 243, 244, 246]
+    comment: "Tryb egzaminacyjny - odcięcie internetu w pracowniach"
+
+# =============================================================================
+# BGP CONFIGURATION (MetalLB Peering)
+# =============================================================================
+bgp:
+  instance:
+    as: 65000
+    router_id: "192.168.255.1"
+  
+  peers:
+    - name: "k3s-master-01"
+      remote_address: "10.20.0.11"  # TODO: Replace with actual MAC Pro IP
+      remote_as: 65001
+      hold_time: "3m"
+      keepalive_time: "1m"
+    
+    - name: "k3s-master-02"
+      remote_address: "10.20.0.12"
+      remote_as: 65001
+      hold_time: "3m"
+      keepalive_time: "1m"
+    
+    - name: "k3s-master-03"
+      remote_address: "10.20.0.13"
+      remote_as: 65001
+      hold_time: "3m"
+      keepalive_time: "1m"
+  
+  advertised_networks:
+    - network: "10.22.0.0/24"
+      comment: "MetalLB PROD LoadBalancer pool"
+    
+    - network: "10.12.0.0/24"
+      comment: "MetalLB DEV LoadBalancer pool"
+    
+    - network: "10.32.0.0/24"
+      comment: "MetalLB ADM LoadBalancer pool"
+    
+    - network: "10.20.0.0/22"
+      comment: "K3s services network"
+
+# =============================================================================
+# DEVICE INVENTORY
+# =============================================================================
+devices:
+  terraform_managed:
+    - hostname: "CCR2216-GW-BCU-01"
+      model: "CCR2216-1G-12XS-2XQ"
+      ip: "192.168.255.1"
+      location: "CPD-BCU"
+      role: "Core Router"
+      comment: "Managed by Terraform - DON'T EDIT MANUALLY"
+  
+  ansible_managed:
+    core:
+      - hostname: "CCR2216-GW-ZSEL-01"
+        model: "CCR2216-1G-12XS-2XQ"
+        ip: "192.168.255.2"
+        location: "CPD-ZSEL-9A"
+      
+      - hostname: "CCR2216-GW-ZSEL-02"
+        model: "CCR2216-1G-12XS-2XQ"
+        ip: "192.168.255.3"
+        location: "CPD-ZSEL-9A"
+      
+      - hostname: "CCR2216-GW-ZSEL-03"
+        model: "CCR2216-1G-12XS-2XQ"
+        ip: "192.168.255.4"
+        location: "CPD-ZSEL-9A"
+    
+    aggregation:
+      - hostname: "CRS518-AGG-CPD-01"
+        model: "CRS518-16XS-2XQ"
+        ip: "192.168.255.11"
+      - hostname: "CRS518-AGG-CPD-02"
+        model: "CRS518-16XS-2XQ"
+        ip: "192.168.255.12"
+      - hostname: "CRS518-AGG-CPD-03"
+        model: "CRS518-16XS-2XQ"
+        ip: "192.168.255.13"
+      - hostname: "CRS518-AGG-CPD-04"
+        model: "CRS518-16XS-2XQ"
+        ip: "192.168.255.14"
+      - hostname: "CRS518-AGG-CPD-05"
+        model: "CRS518-16XS-2XQ"
+        ip: "192.168.255.15"
+      - hostname: "CRS518-AGG-CPD-06"
+        model: "CRS518-16XS-2XQ"
+        ip: "192.168.255.16"
+    
+    distribution:
+      - hostname: "CRS354-PD-P0-W"
+        model: "CRS354-48G-4S+2Q+"
+        ip: "192.168.255.20"
+      - hostname: "CRS354-PD-P0-S"
+        model: "CRS354-48G-4S+2Q+"
+        ip: "192.168.255.21"
+      - hostname: "CRS354-PD-P1-W"
+        model: "CRS354-48G-4S+2Q+"
+        ip: "192.168.255.22"
+      - hostname: "CRS354-PD-P1-S"
+        model: "CRS354-48G-4S+2Q+"
+        ip: "192.168.255.23"
+      - hostname: "CRS354-PD-P2-W"
+        model: "CRS354-48G-4S+2Q+"
+        ip: "192.168.255.24"
+      - hostname: "CRS354-PD-P2-S"
+        model: "CRS354-48G-4S+2Q+"
+        ip: "192.168.255.25"
+      - hostname: "CRS354-PD-P3-W"
+        model: "CRS354-48G-4S+2Q+"
+        ip: "192.168.255.26"
+      - hostname: "CRS354-PD-P3-S"
+        model: "CRS354-48G-4S+2Q+"
+        ip: "192.168.255.27"
+      - hostname: "CRS354-PPD-P0-S7"
+        model: "CRS354-48G-4S+2Q+"
+        ip: "192.168.255.28"
+        location: "Biblioteka - Sala 7"
+    
+    access:
+      # Sale 8, 9, 23-31, 41-46 (15 pracowni)
+      # IP range: 192.168.255.30-44
+      - hostname: "CRS326-KPD-P0-08"
+        model: "CRS326-24G-2S+"
+        ip: "192.168.255.30"
+      - hostname: "CRS326-KPD-P0-09"
+        model: "CRS326-24G-2S+"
+        ip: "192.168.255.31"
+    
+    poe:
+      - hostname: "CRS328-POE-CPD-01"
+        model: "CRS328-24P-4S+"
+        ip: "192.168.255.50"
+        location: "CPD-ZSEL-9A"
+        comment: "PoE for WiFi APs"

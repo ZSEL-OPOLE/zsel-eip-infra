@@ -1,20 +1,221 @@
 # zsel-eip-infra
 
-Infrastructure as Code (Terraform, VM templates, storage policies, DR configs)
+Infrastructure as Code - Terraform configuration with YAML-driven generator
 
 ## 📋 Overview
 
-This repository is part of the ZSEL Opole IT infrastructure.
+Centralized configuration management for ZSEL Opole network infrastructure:
+- **57 MikroTik devices** (5× CCR2216, 6× CRS518, 16× CRS354, 13× CRS326, 1× CRS328, 16× cAP)
+- **29 VLANs** (PFU 2.7 compliant)
+- **Single source of truth**: `common/vlans-master.yaml`
+- **Automatic Terraform generation**: `scripts/generate-terraform.py`
 
 **Organization:** https://github.com/zsel-opole
 
+---
+
+## 📁 Repository Structure
+
+```
+zsel-eip-infra/
+├── common/
+│   └── vlans-master.yaml           # Single source of truth (YAML)
+├── scripts/
+│   └── generate-terraform.py       # Terraform generator
+└── zsel-eip-tf-infra/
+    └── environments/
+        └── networking-prod/
+            └── prod-values.auto.tfvars  # Auto-generated Terraform config
+```
+
+---
+
 ## 🚀 Quick Start
 
-TODO: Add quick start guide
+### 1. Edit Configuration (Single File!)
+```bash
+# Edit YAML source of truth
+code common/vlans-master.yaml
+```
+
+### 2. Generate Terraform Configuration
+```bash
+# Run generator
+python scripts/generate-terraform.py
+
+# Output: zsel-eip-tf-infra/environments/networking-prod/prod-values-generated.auto.tfvars
+```
+
+### 3. Activate & Validate
+```bash
+cd zsel-eip-tf-infra/environments/networking-prod
+
+# Backup old config (if exists)
+mv prod-values.auto.tfvars prod-values-OLD.backup
+
+# Activate new config
+mv prod-values-generated.auto.tfvars prod-values.auto.tfvars
+
+# Validate
+terraform validate
+
+# Plan deployment
+terraform plan
+```
+
+---
+
+## 📊 Network Structure (PFU 2.7 Compliant)
+
+### VLANs Overview (29 total)
+
+| VLAN Range | Count | Purpose | Addressing |
+|------------|-------|---------|------------|
+| **101-104** | 4 | Sale dydaktyczne (per piętro) | `192.168.[1-4].0/24` |
+| **110** | 1 | Telewizory informacyjne | `192.168.10.0/24` |
+| **208-246** | 15 | **Pracownie uczniowskie** (sale 8,9,23-31,41-46) | `10.[NR_SALI].0.0/16` |
+| **300-303** | 4 | WiFi uczniowska (per piętro) | `10.100.[1-4].0/24` |
+| **400-401** | 2 | Serwery uczniowskie | `10.200.[100,200].0/24` |
+| **500** | 1 | Sieć administracyjna | `172.20.20.0/24` |
+| **501** | 1 | Kamery CCTV | `172.21.1.0/24` |
+| **600** | 1 | Zarządzanie infrastrukturą | `192.168.255.0/28` |
+
+### VLAN 208-246: Pracownie (Physical Rooms)
+```
+VLAN = Numer SALI FIZYCZNEJ (nie klasy uczniowskiej!)
+
+Parter:     VLAN 208, 209 = Sale 8, 9
+Piętro I:   VLAN 223-225 = Sale 23-25
+Piętro II:  VLAN 226-228, 230-231 = Sale 26-28, 30-31
+Piętro III: VLAN 241-244, 246 = Sale 41-44, 46
+```
+
+### QoS Policies (PFU 2.7)
+```yaml
+Pracownie (VLAN 208-246):  60M/60M (burst 80M, 30s)
+Sale dydaktyczne (101-104): 1000M/1000M per piętro
+WiFi uczniowska (300-303):  200M/200M per piętro
+Administracja (500):        unlimited
+CCTV (501):                 100M/100M
+Management (600):           unlimited (priority 7)
+```
+
+---
+
+## 🔧 Maintenance Workflow
+
+### Adding New VLAN
+```bash
+# 1. Edit YAML (single source of truth)
+code common/vlans-master.yaml
+
+# 2. Add VLAN definition (example):
+vlans:
+  labs:
+    - sala: 47
+      vlan_id: 247
+      subnet: "10.47.0.0/16"
+      gateway: "10.47.0.1"
+      floor: "P3"
+      type: "mobile"
+      ports: 18
+
+# 3. Regenerate Terraform
+python scripts/generate-terraform.py
+
+# 4. Review & deploy
+cd zsel-eip-tf-infra/environments/networking-prod
+terraform validate
+terraform plan
+terraform apply
+```
+
+### Modifying QoS
+```bash
+# 1. Edit qos_policies section in vlans-master.yaml
+qos_policies:
+  labs:
+    max_limit: "100M/100M"  # Changed from 60M
+    burst_limit: "120M/120M"
+
+# 2. Regenerate & redeploy
+python scripts/generate-terraform.py
+terraform apply
+```
+
+---
 
 ## 📚 Documentation
 
-See [docs/](./docs/) for detailed documentation.
+### Key Files
+- **`common/vlans-master.yaml`** - Single source of truth (324 lines)
+  - VLANs definition (29 VLANs)
+  - QoS policies (PFU 2.7 compliant)
+  - BGP configuration (MetalLB peering)
+  - Firewall rules matrix
+  - Device inventory (57 MikroTik devices)
+
+- **`scripts/generate-terraform.py`** - Python generator (280 lines)
+  - Reads YAML → generates Terraform HCL
+  - Functions: `generate_vlans()`, `generate_qos()`, `generate_bgp()`
+  - Output: `prod-values-generated.auto.tfvars`
+
+### Related Repositories
+- **zsel-eip-network** - Network documentation (VLAN-ROUTING-FIREWALL.md, PFU compliance)
+- **zsel-eip-ansible** - Ansible playbooks (for 56 MikroTik devices)
+- **zsel-eip-dokumentacja** - Full PFU documentation (architektura/pfu.md)
+- **zsel-eip-gitops** - K3s GitOps configuration (ArgoCD, MetalLB, BGP)
+
+---
+
+## 🏗️ Architecture
+
+### Deployment Strategy
+```
+Terraform (1 device):    CCR2216-BCU-01 (core router)
+                         ↓ manages configuration
+                         
+Ansible (56 devices):    Remaining MikroTik switches
+                         ↓ propagates config from core
+```
+
+### Single Source of Truth Flow
+```
+Edit vlans-master.yaml
+    ↓
+python generate-terraform.py
+    ↓
+prod-values.auto.tfvars (Terraform)
+    ↓
+terraform apply → CCR2216-BCU-01
+    ↓
+ansible-playbook → 56 devices
+```
+
+---
+
+## ⚠️ Important Notes
+
+1. **DO NOT edit `prod-values.auto.tfvars` manually!**
+   - Always edit `common/vlans-master.yaml`
+   - Run `generate-terraform.py` to regenerate
+
+2. **VLAN 208-246 = Physical room numbers** (not class names!)
+   - Example: VLAN 208 = Sala 8 (not "klasa 1AT")
+   - See PFU 2.7 documentation for room mapping
+
+3. **Backup before changes:**
+   ```bash
+   mv prod-values.auto.tfvars prod-values-$(date +%Y%m%d).backup
+   ```
+
+4. **Always validate:**
+   ```bash
+   terraform validate
+   terraform plan  # Review before apply!
+   ```
+
+---
 
 ## 👥 Team
 
@@ -22,10 +223,17 @@ See [docs/](./docs/) for detailed documentation.
 - **DevOps Team:** devops@zsel.opole.pl
 - **IT Admin:** it@zsel.opole.pl
 
-## 📄 License
+---
 
-See [LICENSE](./LICENSE) file.
+## 📄 Compliance
+
+- **PFU 2.7** - Program Funkcjonalno-Użytkowy (Branżowe Centrum Umiejętności)
+- **Naming Convention:** `<MODEL>-<RODZAJ>-<LOKALIZACJA>-<NR>`
+- **QoS Requirements:** 60M (pracownie), 200M (WiFi), 1000M (dydaktyczne)
+- **Security:** SSH only (port 2222), Telnet/HTTP disabled
 
 ---
 
-**Last updated:** 2025-11-24
+**Last updated:** 2025-11-27
+**PFU Compliance:** ✅ 2.7
+**VLANs:** 29 (15 pracownie + 4 dydaktyczne + 10 infrastruktury)
