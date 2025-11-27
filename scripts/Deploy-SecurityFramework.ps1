@@ -344,9 +344,7 @@ This PR deploys the organization-wide security framework to this repository.
             --title "🔒 Deploy Security Framework" `
             --body $prBody `
             --base main `
-            --head $BranchName `
-            --label "infrastructure" `
-            --assignee "@me"
+            --head $BranchName
 
         if ($LASTEXITCODE -eq 0) {
             Write-ColorOutput "  ✅ Pull Request created!" -Color Green
