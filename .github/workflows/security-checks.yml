@@ -2,9 +2,9 @@ name: Security & Quality Checks
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # Codzienne skanowanie o 2:00 UTC
     - cron: '0 2 * * *'
@@ -33,13 +33,13 @@ jobs:
           path: ./
           extra_args: --only-verified
 
-      # GitLeaks requires a license for organization accounts
-      # Uncomment after obtaining license at gitleaks.io
-      # - name: GitLeaks Secret Scanner
-      #   uses: gitleaks/gitleaks-action@v2
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+        # GitLeaks requires a license for organization accounts
+        # Uncomment after obtaining license at gitleaks.io
+        # - name: GitLeaks Secret Scanner
+        #   uses: gitleaks/gitleaks-action@v2
+        #   env:
+        #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #     GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
   # ═══════════════════════════════════════════════════════════════
   # POWERSHELL SECURITY
@@ -55,15 +55,15 @@ jobs:
         shell: pwsh
         run: |
           Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
-          
+
           $results = Invoke-ScriptAnalyzer -Path . -Recurse -Settings PSGallery -Severity Error,Warning
-          
+
           if ($results.Count -gt 0) {
             Write-Host "::error::Found $($results.Count) PSScriptAnalyzer issues"
             $results | Format-Table -AutoSize
             exit 1
           }
-          
+
           Write-Host "✓ No PSScriptAnalyzer issues found"
 
       - name: Check for Hardcoded Credentials
@@ -76,7 +76,7 @@ jobs:
             'API[_-]?KEY\s*=\s*[''"][^''"]+[''"]',
             'TOKEN\s*=\s*[''"][^''"]+[''"]'
           )
-          
+
           $found = $false
           Get-ChildItem -Path . -Include *.ps1,*.psm1,*.psd1 -Recurse | ForEach-Object {
             $content = Get-Content $_.FullName -Raw
@@ -87,11 +87,11 @@ jobs:
               }
             }
           }
-          
+
           if ($found) {
             exit 1
           }
-          
+
           Write-Host "✓ No hardcoded credentials found"
 
   # ═══════════════════════════════════════════════════════════════
@@ -189,7 +189,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y yamllint
-          
+
           find . -name "*.yml" -o -name "*.yaml" | while read file; do
             echo "Validating $file"
             yamllint -c .yamllint.yml "$file"
@@ -257,13 +257,13 @@ jobs:
       - name: Check for large files
         run: |
           MAX_SIZE=10485760  # 10MB
-          
+
           find . -type f -size +10M | while read file; do
             size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
             echo "::error file=$file::File exceeds 10MB limit: $size bytes"
             exit 1
           done
-          
+
           echo "✓ No files exceed 10MB limit"
 
       - name: Check for sensitive files
@@ -281,7 +281,7 @@ jobs:
             ".env.local"
             ".env.production"
           )
-          
+
           found=false
           for pattern in "${SENSITIVE_PATTERNS[@]}"; do
             if find . -name "$pattern" | grep -q .; then
@@ -290,11 +290,11 @@ jobs:
               found=true
             fi
           done
-          
-          if [ "$found" = true ]; then
+
+          if ["$found" = true]; then
             exit 1
           fi
-          
+
           echo "✓ No sensitive files found"
 
   # ═══════════════════════════════════════════════════════════════

@@ -10,13 +10,13 @@
 
 Ten katalog zawiera **gotowe pliki konfiguracyjne RouterOS (.rsc)** dla wszystkich 5 switchy w infrastrukturze K3s:
 
-| Plik | Urządzenie | Rola | Management IP |
-|------|------------|------|---------------|
-| `core-switch-01.rsc` | CORE-SWITCH-01 | Core router/gateway | 192.168.255.1/28 |
-| `access-switch-01.rsc` | ACCESS-SWITCH-01 | Mac Pro 01-03 (masters) | 192.168.255.11/28 |
-| `access-switch-02.rsc` | ACCESS-SWITCH-02 | Mac Pro 04-06 (workers) | 192.168.255.12/28 |
-| `access-switch-03.rsc` | ACCESS-SWITCH-03 | Mac Pro 07-09 (workers) | 192.168.255.13/28 |
-| `access-switch-04.rsc` | ACCESS-SWITCH-04 | Redundancy (backup NICs) | 192.168.255.14/28 |
+| Plik                   | Urządzenie       | Rola                       | Management IP     |
+|------------------------|------------------|----------------------------|-------------------|
+| `core-switch-01.rsc`   | CORE-SWITCH-01   | Core router/gateway        | 192.168.255.1/28  |
+| `access-switch-01.rsc` | ACCESS-SWITCH-01 | Mac Pro 01-03 (masters)    | 192.168.255.11/28 |
+| `access-switch-02.rsc` | ACCESS-SWITCH-02 | Mac Pro 04-06 (workers)    | 192.168.255.12/28 |
+| `access-switch-03.rsc` | ACCESS-SWITCH-03 | Mac Pro 07-09 (workers)    | 192.168.255.13/28 |
+| `access-switch-04.rsc` | ACCESS-SWITCH-04 | Redundancy (backup NICs)   | 192.168.255.14/28 |
 
 ---
 
@@ -25,12 +25,14 @@ Ten katalog zawiera **gotowe pliki konfiguracyjne RouterOS (.rsc)** dla wszystki
 ### Metoda 1: WinBox Import (Najłatwiejsza)
 
 1. **Factory Reset urządzenia:**
-   ```
+
+   ```routeros
    [System] → [Reset Configuration] → [No Default Configuration] → [Reset]
    ```
 
 2. **Połącz się z urządzeniem:**
-   ```
+
+   ```text
    - Laptop → ether48 (dla ACCESS switches)
    - Laptop → ether2 (dla CORE)
    - IP Laptop: 192.168.88.100/24
@@ -38,7 +40,8 @@ Ten katalog zawiera **gotowe pliki konfiguracyjne RouterOS (.rsc)** dla wszystki
    ```
 
 3. **Import pliku .rsc:**
-   ```
+
+   ```routeros
    WinBox → [Files] → Drag & Drop plik .rsc
    [New Terminal] → Wpisz:
    /import core-switch-01.rsc
@@ -47,6 +50,7 @@ Ten katalog zawiera **gotowe pliki konfiguracyjne RouterOS (.rsc)** dla wszystki
 4. **Poczekaj na zakończenie importu** (kilka sekund)
 
 5. **Zmień IP laptop** zgodnie z nowym management IP:
+
    ```powershell
    # Dla CORE:
    Remove-NetIPAddress -InterfaceAlias "Ethernet" -Confirm:$false
@@ -58,11 +62,13 @@ Ten katalog zawiera **gotowe pliki konfiguracyjne RouterOS (.rsc)** dla wszystki
 6. **Reconnect via WinBox** (nowy IP: 192.168.255.x)
 
 7. **Enable VLAN filtering:**
+
    ```routeros
    /interface bridge set bridge vlan-filtering=yes
    ```
 
 8. **Backup config:**
+
    ```routeros
    /system backup save name=configured-device
    /export file=configured-device
@@ -92,7 +98,7 @@ Ten katalog zawiera **gotowe pliki konfiguracyjne RouterOS (.rsc)** dla wszystki
 
 **Konfiguruj w tej kolejności** (aby uniknąć konfliktów IP):
 
-```
+```text
 Day 1:
 1. CORE-SWITCH-01 (core-switch-01.rsc)
    - Test: ping google.com
@@ -121,7 +127,7 @@ Day 2 (End):
 
 Wszystkie pliki .rsc używają tego samego hasła:
 
-```
+```text
 Username: admin
 Password: ZSE-BCU-2025!SecureP@ss
 ```
@@ -226,7 +232,8 @@ cd C:\Users\kolod\Desktop\LKP\05_BCU\INFRA\zsel-eip-infra\scripts
 ### Problem: Nie mogę połączyć się po imporcie
 
 **Rozwiązanie:**
-```
+
+```text
 1. Zmień IP laptop na 192.168.255.100/28
 2. Gateway: 192.168.255.1
 3. Reconnect do nowego IP (192.168.255.x)
@@ -236,6 +243,7 @@ cd C:\Users\kolod\Desktop\LKP\05_BCU\INFRA\zsel-eip-infra\scripts
 ### Problem: Brak Internetu na ACCESS switch
 
 **Rozwiązanie:**
+
 ```routeros
 # Sprawdź default route:
 /ip route print
@@ -252,6 +260,7 @@ cd C:\Users\kolod\Desktop\LKP\05_BCU\INFRA\zsel-eip-infra\scripts
 ### Problem: VLAN nie działa
 
 **Rozwiązanie:**
+
 ```routeros
 # Sprawdź czy VLAN filtering włączony:
 /interface bridge print

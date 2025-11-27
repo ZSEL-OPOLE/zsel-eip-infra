@@ -251,11 +251,16 @@ jobs:
 
             // Language labels
             const fileExtensions = files.data.map(f => f.filename.split('.').pop());
-            if (fileExtensions.some(ext => ['ps1', 'psm1', 'psd1'].includes(ext))) labels.push('powershell');
-            if (fileExtensions.some(ext => ['py'].includes(ext))) labels.push('python');
-            if (fileExtensions.some(ext => ['tf', 'tfvars'].includes(ext))) labels.push('terraform');
-            if (fileExtensions.some(ext => ['yml', 'yaml'].includes(ext))) labels.push('yaml');
-            if (fileExtensions.some(ext => ['md'].includes(ext))) labels.push('documentation');
+            const extChecks = [
+              {exts: ['ps1', 'psm1', 'psd1'], label: 'powershell'},
+              {exts: ['py'], label: 'python'},
+              {exts: ['tf', 'tfvars'], label: 'terraform'},
+              {exts: ['yml', 'yaml'], label: 'yaml'},
+              {exts: ['md'], label: 'documentation'}
+            ];
+            extChecks.forEach(({exts, label}) => {
+              if (fileExtensions.some(ext => exts.includes(ext))) labels.push(label);
+            });
 
             // Path labels
             const paths = files.data.map(f => f.filename);
