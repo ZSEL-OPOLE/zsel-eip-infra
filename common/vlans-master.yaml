@@ -229,12 +229,13 @@ vlans:
       kpd: "KPD-P3-46"
       description: "Pracownia Mobilna 46 - Piętro III"
 
-  # === TELEWIZORY INFORMACYJNE - VLAN 110 ===
+  # === TELEWIZORY INFORMACYJNE - VLAN 111 ===
+  # ZMIANA: było VLAN 110 → zmieniono na 111 (konflikt z Kubernetes)
   tv:
-    vlan_id: 110
-    subnet: "192.168.10.0/24"
-    gateway: "192.168.10.1"
-    dhcp_pool: "192.168.10.51-192.168.10.250"
+    vlan_id: 111
+    subnet: "192.168.11.0/24"
+    gateway: "192.168.11.1"
+    dhcp_pool: "192.168.11.51-192.168.11.250"
     lease_time: "24h"
     description: "Telewizory informacyjne (korytarze)"
 
@@ -314,6 +315,94 @@ vlans:
     dhcp_enabled: false
     description: "Zarządzanie infrastrukturą (tylko static IP)"
 
+  # === KLASTER KUBERNETES - VLAN 110 ===
+  # 1 klaster K3s = 9 węzłów Mac Pro M2 Ultra (3 masters + 6 workers)
+  # Total resources: 216 CPU cores, 1728 GB RAM, 72 TB storage
+  kubernetes:
+    vlan_id: 110
+    subnet: "192.168.10.0/24"
+    gateway: "192.168.10.1"
+    dhcp_pool: "192.168.10.200-192.168.10.254"
+    lease_time: "24h"
+    description: "K3s Cluster - 9× Mac Pro M2 Ultra (3 control plane + 6 workers)"
+    
+    nodes:
+      # Control Plane (HA etcd cluster)
+      masters:
+        - hostname: "k3s-master-01"
+          ip: "192.168.10.11"
+          mac: "CHANGE_ME_MAC_MASTER_01"
+          role: "control-plane"
+          comment: "etcd leader candidate"
+        
+        - hostname: "k3s-master-02"
+          ip: "192.168.10.12"
+          mac: "CHANGE_ME_MAC_MASTER_02"
+          role: "control-plane"
+          comment: "etcd member"
+        
+        - hostname: "k3s-master-03"
+          ip: "192.168.10.13"
+          mac: "CHANGE_ME_MAC_MASTER_03"
+          role: "control-plane"
+          comment: "etcd member"
+      
+      # Worker Nodes (specialized workloads)
+      workers:
+        - hostname: "k3s-worker-01"
+          ip: "192.168.10.14"
+          mac: "CHANGE_ME_MAC_WORKER_01"
+          role: "worker"
+          labels: "education"
+          comment: "Moodle, BBB, NextCloud"
+        
+        - hostname: "k3s-worker-02"
+          ip: "192.168.10.15"
+          mac: "CHANGE_ME_MAC_WORKER_02"
+          role: "worker"
+          labels: "education"
+          comment: "Mattermost, OnlyOffice, Etherpad"
+        
+        - hostname: "k3s-worker-03"
+          ip: "192.168.10.16"
+          mac: "CHANGE_ME_MAC_WORKER_03"
+          role: "worker"
+          labels: "devops"
+          comment: "GitLab, Harbor, Portainer"
+        
+        - hostname: "k3s-worker-04"
+          ip: "192.168.10.17"
+          mac: "CHANGE_ME_MAC_WORKER_04"
+          role: "worker"
+          labels: "ai-ml"
+          comment: "Ollama, JupyterHub, Qdrant"
+        
+        - hostname: "k3s-worker-05"
+          ip: "192.168.10.18"
+          mac: "CHANGE_ME_MAC_WORKER_05"
+          role: "worker"
+          labels: "analytics"
+          comment: "Zabbix, Prometheus, Grafana"
+        
+        - hostname: "k3s-worker-06"
+          ip: "192.168.10.19"
+          mac: "CHANGE_ME_MAC_WORKER_06"
+          role: "worker"
+          labels: "storage"
+          comment: "Longhorn, MinIO"
+    
+    # MetalLB LoadBalancer IP pools
+    metallb:
+      prod:
+        range: "192.168.10.20-192.168.10.51"
+        count: 32
+        comment: "LoadBalancer pool dla aplikacji produkcyjnych"
+      
+      dev:
+        range: "192.168.10.101-192.168.10.150"
+        count: 50
+        comment: "LoadBalancer pool dla środowiska DEV"
+
 # =============================================================================
 # QoS POLICIES - PFU 2.7 REQUIREMENTS
 # =============================================================================
@@ -391,38 +480,39 @@ bgp:
   instance:
     as: 65000
     router_id: "192.168.255.1"
+    comment: "CCR2216-BCU-01 Router"
   
   peers:
     - name: "k3s-master-01"
-      remote_address: "10.20.0.11"  # TODO: Replace with actual MAC Pro IP
+      remote_address: "192.168.10.11"  # VLAN 110 - K3s control plane
       remote_as: 65001
       hold_time: "3m"
       keepalive_time: "1m"
+      comment: "MetalLB speaker on k3s-master-01"
     
     - name: "k3s-master-02"
-      remote_address: "10.20.0.12"
+      remote_address: "192.168.10.12"
       remote_as: 65001
       hold_time: "3m"
       keepalive_time: "1m"
+      comment: "MetalLB speaker on k3s-master-02"
     
     - name: "k3s-master-03"
-      remote_address: "10.20.0.13"
+      remote_address: "192.168.10.13"
       remote_as: 65001
       hold_time: "3m"
       keepalive_time: "1m"
+      comment: "MetalLB speaker on k3s-master-03"
   
   advertised_networks:
-    - network: "10.22.0.0/24"
-      comment: "MetalLB PROD LoadBalancer pool"
+    - network: "192.168.10.20/27"
+      comment: "MetalLB PROD pool (.20-.51 = 32 IPs)"
     
-    - network: "10.12.0.0/24"
-      comment: "MetalLB DEV LoadBalancer pool"
+    - network: "192.168.10.101/26"
+      comment: "MetalLB DEV pool (.101-.150 = 50 IPs)"
     
-    - network: "10.32.0.0/24"
-      comment: "MetalLB ADM LoadBalancer pool"
-    
-    - network: "10.20.0.0/22"
-      comment: "K3s services network"
+    - network: "192.168.10.0/24"
+      comment: "K3s cluster network (full VLAN 110 - optional for routing)"
 
 # =============================================================================
 # DEVICE INVENTORY

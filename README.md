@@ -67,18 +67,45 @@ terraform plan
 
 ## 📊 Network Structure (PFU 2.7 Compliant)
 
-### VLANs Overview (29 total)
+### VLANs Overview (30 total)
 
 | VLAN Range | Count | Purpose | Addressing |
 |------------|-------|---------|------------|
 | **101-104** | 4 | Sale dydaktyczne (per piętro) | `192.168.[1-4].0/24` |
-| **110** | 1 | Telewizory informacyjne | `192.168.10.0/24` |
+| **110** | 1 | **Klaster Kubernetes (K3s)** | `192.168.10.0/24` |
 | **208-246** | 15 | **Pracownie uczniowskie** (sale 8,9,23-31,41-46) | `10.[NR_SALI].0.0/16` |
 | **300-303** | 4 | WiFi uczniowska (per piętro) | `10.100.[1-4].0/24` |
 | **400-401** | 2 | Serwery uczniowskie | `10.200.[100,200].0/24` |
 | **500** | 1 | Sieć administracyjna | `172.20.20.0/24` |
 | **501** | 1 | Kamery CCTV | `172.21.1.0/24` |
 | **600** | 1 | Zarządzanie infrastrukturą | `192.168.255.0/28` |
+
+### VLAN 110: Kubernetes Cluster (K3s)
+
+**Architektura: 1 klaster K3s - 9 × Mac Pro M2 Ultra**
+
+```
+Control Plane (HA etcd):
+├── k3s-master-01  192.168.10.11  (etcd leader candidate)
+├── k3s-master-02  192.168.10.12  (etcd member)
+└── k3s-master-03  192.168.10.13  (etcd member)
+
+Worker Nodes (specialized workloads):
+├── k3s-worker-01  192.168.10.14  [education]   → Moodle, BBB, NextCloud
+├── k3s-worker-02  192.168.10.15  [education]   → Mattermost, OnlyOffice
+├── k3s-worker-03  192.168.10.16  [devops]      → GitLab, Harbor
+├── k3s-worker-04  192.168.10.17  [ai-ml]       → Ollama, JupyterHub
+├── k3s-worker-05  192.168.10.18  [analytics]   → Prometheus, Grafana
+└── k3s-worker-06  192.168.10.19  [storage]     → Longhorn, MinIO
+
+MetalLB LoadBalancer Pools:
+├── PROD:  192.168.10.20-.51   (32 IPs)
+└── DEV:   192.168.10.101-.150 (50 IPs)
+
+Total: 216 CPU cores, 1728 GB RAM, 72 TB storage, 39 apps
+```
+
+**BGP:** CCR2216-BCU-01 (AS 65000) ↔ K3s (AS 65001) - 3 peers
 
 ### VLAN 208-246: Pracownie (Physical Rooms)
 ```

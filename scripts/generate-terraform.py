@@ -26,7 +26,14 @@ def generate_vlans(config: Dict) -> str:
             'subnet': floor_data['subnet']
         }
     
-    # VLAN 110: Telewizory
+    # VLAN 110: Kubernetes K3s Cluster
+    k8s = config['vlans']['kubernetes']
+    vlans[str(k8s['vlan_id'])] = {
+        'name': 'k8s-cluster',
+        'subnet': k8s['subnet']
+    }
+    
+    # VLAN 111: Telewizory
     tv = config['vlans']['tv']
     vlans[str(tv['vlan_id'])] = {
         'name': 'tv-info',
@@ -265,7 +272,7 @@ def main():
         f.write(bgp_tf)
     
     # Summary
-    vlan_count = len(config['vlans']['dydactic']) + 1 + len(config['vlans']['labs']) + len(config['vlans']['wifi']) + len(config['vlans']['servers']) + 3  # +3 = admin, cctv, mgmt
+    vlan_count = len(config['vlans']['dydactic']) + 2 + len(config['vlans']['labs']) + len(config['vlans']['wifi']) + len(config['vlans']['servers']) + 3  # +2 = k8s (110) + tv (111), +3 = admin, cctv, mgmt
     qos_count = len(config['vlans']['labs']) + len(config['vlans']['dydactic']) + len(config['vlans']['wifi'])
     bgp_peer_count = len(config['bgp']['peers'])
     bgp_net_count = len(config['bgp']['advertised_networks'])
@@ -275,7 +282,8 @@ def main():
     print('='*70)
     print(f'VLANs generated:      {vlan_count}')
     print(f'  - Dydactic (101-104): {len(config["vlans"]["dydactic"])}')
-    print(f'  - TV (110): 1')
+    print(f'  - Kubernetes (110): 1')
+    print(f'  - TV (111): 1')
     print(f'  - Labs (208-246): {len(config["vlans"]["labs"])} (Sale: 8,9,23-31,41-46)')
     print(f'  - WiFi (300-303): {len(config["vlans"]["wifi"])}')
     print(f'  - Servers (400-401): {len(config["vlans"]["servers"])}')

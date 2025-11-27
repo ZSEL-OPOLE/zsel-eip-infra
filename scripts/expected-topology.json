@@ -1,0 +1,176 @@
+{
+  "_comment": "Expected network topology for K3s infrastructure (5 switches)",
+  "_description": "This file defines the expected trunk connections between switches. Used by Verify-NetworkTopology.ps1",
+  "_timestamp": "2025-01-27",
+  
+  "CORE-SWITCH-01": [
+    {
+      "LocalPort": "sfp-sfpplus1",
+      "RemoteDevice": "ACCESS-SWITCH-01",
+      "RemotePort": "sfp-sfpplus1",
+      "VLANs": [110, 600],
+      "Description": "Trunk to ACCESS-01 (Mac Pro 01-03: Masters)"
+    },
+    {
+      "LocalPort": "sfp-sfpplus2",
+      "RemoteDevice": "ACCESS-SWITCH-02",
+      "RemotePort": "sfp-sfpplus1",
+      "VLANs": [110, 600],
+      "Description": "Trunk to ACCESS-02 (Mac Pro 04-06: Workers 01-03)"
+    },
+    {
+      "LocalPort": "sfp-sfpplus3",
+      "RemoteDevice": "ACCESS-SWITCH-03",
+      "RemotePort": "sfp-sfpplus1",
+      "VLANs": [110, 600],
+      "Description": "Trunk to ACCESS-03 (Mac Pro 07-09: Workers 04-06)"
+    },
+    {
+      "LocalPort": "sfp-sfpplus4",
+      "RemoteDevice": "ACCESS-SWITCH-04",
+      "RemotePort": "sfp-sfpplus1",
+      "VLANs": [110, 600],
+      "Description": "Trunk to ACCESS-04 (Redundancy for all 9 Mac Pro)"
+    }
+  ],
+  
+  "ACCESS-SWITCH-01": [
+    {
+      "LocalPort": "sfp-sfpplus1",
+      "RemoteDevice": "CORE-SWITCH-01",
+      "RemotePort": "sfp-sfpplus1",
+      "VLANs": [110, 600],
+      "Description": "Trunk to CORE (uplink)"
+    }
+  ],
+  
+  "ACCESS-SWITCH-02": [
+    {
+      "LocalPort": "sfp-sfpplus1",
+      "RemoteDevice": "CORE-SWITCH-01",
+      "RemotePort": "sfp-sfpplus2",
+      "VLANs": [110, 600],
+      "Description": "Trunk to CORE (uplink)"
+    }
+  ],
+  
+  "ACCESS-SWITCH-03": [
+    {
+      "LocalPort": "sfp-sfpplus1",
+      "RemoteDevice": "CORE-SWITCH-01",
+      "RemotePort": "sfp-sfpplus3",
+      "VLANs": [110, 600],
+      "Description": "Trunk to CORE (uplink)"
+    }
+  ],
+  
+  "ACCESS-SWITCH-04": [
+    {
+      "LocalPort": "sfp-sfpplus1",
+      "RemoteDevice": "CORE-SWITCH-01",
+      "RemotePort": "sfp-sfpplus4",
+      "VLANs": [110, 600],
+      "Description": "Trunk to CORE (uplink)"
+    }
+  ],
+  
+  "_physical_layout": {
+    "rack": "ZSE-BCU Server Room",
+    "topology_type": "Star (Core-Access)",
+    "total_switches": 5,
+    "total_trunk_connections": 4,
+    "total_server_connections": 18,
+    "vlans_in_use": [110, 600],
+    "cable_types": {
+      "trunks": "10G SFP+ DAC/Fiber",
+      "servers": "10G Copper (CAT6A)"
+    }
+  },
+  
+  "_server_connections": {
+    "ACCESS-SWITCH-01": {
+      "ether1": { "device": "Mac Pro 01", "role": "k3s-master-01", "primary_ip": "192.168.10.11", "vlan": 110 },
+      "ether2": { "device": "Mac Pro 02", "role": "k3s-master-02", "primary_ip": "192.168.10.12", "vlan": 110 },
+      "ether3": { "device": "Mac Pro 03", "role": "k3s-master-03", "primary_ip": "192.168.10.13", "vlan": 110 },
+      "ether48": { "device": "Management Laptop", "role": "admin", "vlan": 600 }
+    },
+    "ACCESS-SWITCH-02": {
+      "ether1": { "device": "Mac Pro 04", "role": "k3s-worker-01", "primary_ip": "192.168.10.14", "vlan": 110 },
+      "ether2": { "device": "Mac Pro 05", "role": "k3s-worker-02", "primary_ip": "192.168.10.15", "vlan": 110 },
+      "ether3": { "device": "Mac Pro 06", "role": "k3s-worker-03", "primary_ip": "192.168.10.16", "vlan": 110 },
+      "ether48": { "device": "Management Laptop", "role": "admin", "vlan": 600 }
+    },
+    "ACCESS-SWITCH-03": {
+      "ether1": { "device": "Mac Pro 07", "role": "k3s-worker-04", "primary_ip": "192.168.10.17", "vlan": 110 },
+      "ether2": { "device": "Mac Pro 08", "role": "k3s-worker-05", "primary_ip": "192.168.10.18", "vlan": 110 },
+      "ether3": { "device": "Mac Pro 09", "role": "k3s-worker-06", "primary_ip": "192.168.10.19", "vlan": 110 },
+      "ether48": { "device": "Management Laptop", "role": "admin", "vlan": 600 }
+    },
+    "ACCESS-SWITCH-04": {
+      "ether1": { "device": "Mac Pro 01 NIC2", "role": "backup-master-01", "vlan": 110 },
+      "ether2": { "device": "Mac Pro 02 NIC2", "role": "backup-master-02", "vlan": 110 },
+      "ether3": { "device": "Mac Pro 03 NIC2", "role": "backup-master-03", "vlan": 110 },
+      "ether4": { "device": "Mac Pro 04 NIC2", "role": "backup-worker-01", "vlan": 110 },
+      "ether5": { "device": "Mac Pro 05 NIC2", "role": "backup-worker-02", "vlan": 110 },
+      "ether6": { "device": "Mac Pro 06 NIC2", "role": "backup-worker-03", "vlan": 110 },
+      "ether7": { "device": "Mac Pro 07 NIC2", "role": "backup-worker-04", "vlan": 110 },
+      "ether8": { "device": "Mac Pro 08 NIC2", "role": "backup-worker-05", "vlan": 110 },
+      "ether9": { "device": "Mac Pro 09 NIC2", "role": "backup-worker-06", "vlan": 110 },
+      "ether48": { "device": "Management Laptop", "role": "admin", "vlan": 600 }
+    }
+  },
+  
+  "_verification_notes": {
+    "lldp_enabled": "All switches have LLDP enabled (cdp,lldp,mndp protocols)",
+    "discovery_time": "LLDP neighbors appear within 30-60 seconds after cable connection",
+    "verification_command": "/ip neighbor print detail",
+    "expected_neighbors_per_device": {
+      "CORE-SWITCH-01": 4,
+      "ACCESS-SWITCH-01": 1,
+      "ACCESS-SWITCH-02": 1,
+      "ACCESS-SWITCH-03": 1,
+      "ACCESS-SWITCH-04": 1
+    }
+  },
+  
+  "_troubleshooting": {
+    "no_lldp_neighbors": [
+      "Check cable connection (SFP+ modules seated properly)",
+      "Verify VLAN filtering is enabled: /interface bridge print",
+      "Check if ports are not disabled: /interface print",
+      "Wait 60 seconds for LLDP discovery",
+      "Verify LLDP is enabled: /ip neighbor discovery-settings print"
+    ],
+    "wrong_remote_device": [
+      "Cable connected to wrong port on CORE switch",
+      "Check physical cable labels",
+      "Verify against physical topology diagram"
+    ],
+    "missing_vlans_on_trunk": [
+      "Check bridge VLAN configuration: /interface bridge vlan print",
+      "Verify VLAN filtering is enabled",
+      "Ensure VLANs 110 and 600 are tagged on trunk ports"
+    ]
+  },
+  
+  "_automation": {
+    "verification_script": "scripts/Verify-NetworkTopology.ps1",
+    "expected_runtime": "30-60 seconds",
+    "prerequisites": [
+      "Posh-SSH module installed",
+      "Laptop connected to Management VLAN 600",
+      "All switches powered on and configured",
+      "LLDP discovery completed (wait 60s after cabling)"
+    ],
+    "example_usage": [
+      "# Basic verification",
+      ".\\Verify-NetworkTopology.ps1",
+      "",
+      "# With HTML report",
+      ".\\Verify-NetworkTopology.ps1 -ExportReport 'C:\\Reports\\topology.html'",
+      "",
+      "# Custom credentials",
+      ".\\Verify-NetworkTopology.ps1 -Username 'admin' -Password 'MyPassword'"
+    ]
+  }
+}
