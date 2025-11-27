@@ -31,7 +31,7 @@ param(
     [switch]$DryRun,
 
     [Parameter(Mandatory=$false)]
-    [switch]$CreateIssues = $true
+    [switch]$CreateIssues
 )
 
 # Repository definitions from ROLLOUT-PLAN.md
@@ -82,6 +82,7 @@ function Write-ColorOutput {
 }
 
 function New-GitHubIssue {
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [string]$RepoName,
         [string]$RepoType,

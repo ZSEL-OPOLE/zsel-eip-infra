@@ -127,7 +127,8 @@ function Copy-FrameworkFiles {
     }
 }
 
-function Adjust-ForRepoType {
+function Update-ForRepoType {
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [string]$TargetPath,
         [string]$RepoType,
@@ -170,6 +171,7 @@ function Adjust-ForRepoType {
 }
 
 function Update-README {
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [string]$TargetPath,
         [string]$RepoName
@@ -219,6 +221,7 @@ pre-commit install
 }
 
 function New-SecurityBranch {
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [string]$TargetPath,
         [string]$BranchName = "security/deploy-framework"
@@ -244,6 +247,7 @@ function New-SecurityBranch {
 }
 
 function New-PullRequest {
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [string]$TargetPath,
         [string]$RepoName,
@@ -423,9 +427,7 @@ $filesToCopy = Get-SecurityFrameworkFiles -RepoType $RepoType
 
 # Create branch FIRST (before any changes!)
 $branchName = "security/deploy-framework-$(Get-Date -Format 'yyyyMMdd')"
-$branch = New-SecurityBranch -TargetPath $targetRepoPath -BranchName $branchName
-
-# Copy framework files
+    New-SecurityBranch -TargetPath $targetRepoPath -BranchName $branchName# Copy framework files
 Copy-FrameworkFiles -SourcePath $sourceRepoPath -TargetPath $targetRepoPath -Files $filesToCopy
 
 # Adjust for repo type
