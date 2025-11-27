@@ -141,20 +141,22 @@ jobs:
             console.log(`Reason: ${reason}`);
             console.log(`Criteria:`, JSON.stringify(criteria, null, 2));
       
-      - name: Auto-approve PR
+      - name: Recommend approval (cannot auto-approve with GITHUB_TOKEN)
         if: steps.check-eligibility.outputs.eligible == 'true'
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}  # Use default token
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github.rest.pulls.createReview({
+            // Cannot approve with GITHUB_TOKEN (Actions cannot approve their own workflows)
+            // Instead: Add recommendation comment + label
+            
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.issue.number,
-              event: 'APPROVE',
-              body: `## ✅ Auto-approved by GitHub Copilot
+              issue_number: context.issue.number,
+              body: `## ✅ Copilot Recommends Approval
               
-              This PR meets the criteria for automatic approval:
+              This PR meets all criteria for automatic approval:
               - Small changes (<500 lines)
               - No security-sensitive files modified
               - All automated checks passed
@@ -169,16 +171,18 @@ jobs:
               
               ${steps.check-eligibility.outputs.reason}
               
-              *Note: This is an automated approval. A human code owner can still review if needed.*
+              **⚠️ Note:** A human code owner must still approve this PR (GitHub Actions cannot auto-approve).
+              
+              *Recommendation by GitHub Copilot*
               `
             });
             
-            // Dodaj label
+            // Add label
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              labels: ['copilot-approved']
+              labels: ['copilot-approved', 'ready-to-merge']
             });
       
       - name: Request human review
