@@ -1,9 +1,9 @@
 # MikroTik RouterOS Configuration Files
 
-**Project:** BCU ZSE Opole - Network Infrastructure  
+**Project:** BCU ZSE Opole - Network Infrastructure
 **Date:** 2025-11-27
 
-> **🔥 NOWOŚĆ:** Automatyczna weryfikacja topologii!  
+> **🔥 NOWOŚĆ:** Automatyczna weryfikacja topologii!
 > Zobacz: [AUTOMATION-TOPOLOGY-VERIFICATION.md](../AUTOMATION-TOPOLOGY-VERIFICATION.md)
 
 ## 📁 Zawartość Katalogu
@@ -55,7 +55,7 @@ Ten katalog zawiera **gotowe pliki konfiguracyjne RouterOS (.rsc)** dla wszystki
    # Dla CORE:
    Remove-NetIPAddress -InterfaceAlias "Ethernet" -Confirm:$false
    New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 192.168.255.100 -PrefixLength 28 -DefaultGateway 192.168.255.1
-   
+
    # Lub dla innych switchy podobnie (subnet 192.168.255.0/28)
    ```
 
@@ -102,17 +102,17 @@ Ten katalog zawiera **gotowe pliki konfiguracyjne RouterOS (.rsc)** dla wszystki
 Day 1:
 1. CORE-SWITCH-01 (core-switch-01.rsc)
    - Test: ping google.com
-   
+
 Day 2:
 2. ACCESS-SWITCH-01 (access-switch-01.rsc)
    - Test: ping 192.168.255.1, ping google.com
-   
+
 3. ACCESS-SWITCH-02 (access-switch-02.rsc)
    - Test: ping 192.168.255.1, ping google.com
-   
+
 4. ACCESS-SWITCH-03 (access-switch-03.rsc)
    - Test: ping 192.168.255.1, ping google.com
-   
+
 5. ACCESS-SWITCH-04 (access-switch-04.rsc)
    - Test: ping 192.168.255.1, ping google.com
 
@@ -344,6 +344,6 @@ Po skonfigurowaniu wszystkich 5 switchy:
 
 ---
 
-**Status:** 🟢 READY FOR DEPLOYMENT  
-**Last Updated:** 2025-11-27  
+**Status:** 🟢 READY FOR DEPLOYMENT
+**Last Updated:** 2025-11-27
 **Author:** ZSE BCU Infrastructure Team

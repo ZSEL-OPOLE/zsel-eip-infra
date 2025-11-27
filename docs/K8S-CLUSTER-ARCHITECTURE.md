@@ -9,7 +9,8 @@
 ## 📋 Architektura Klastra
 
 ### Hardware
-```
+
+```text
 9 × Mac Pro M2 Ultra (2023)
 ├── CPU:     24-core Apple Silicon M2 Ultra (ARM64)
 ├── RAM:     192 GB unified memory
@@ -24,7 +25,8 @@ Total Resources:
 ```
 
 ### Topologia
-```
+
+```text
 Control Plane (HA):
 ├── k3s-master-01  192.168.10.11  (etcd leader candidate)
 ├── k3s-master-02  192.168.10.12  (etcd member)
@@ -47,8 +49,8 @@ Worker Nodes (Specialized):
 
 **OBECNIE BRAK W vlans-master.yaml - DO DODANIA!**
 
-| VLAN ID | Name | Subnet | Gateway | Purpose | Devices |
-|---------|------|--------|---------|---------|---------|
+| VLAN ID | Name              | Subnet           | Gateway       | Purpose           | Devices          |
+|---------|-------------------|------------------|---------------|-------------------|------------------|
 | **10** | K3s-Masters | 192.168.10.0/24 | 192.168.10.1 | Control Plane | 3 masters |
 | **20** | K3s-Workers | 192.168.10.0/24 | 192.168.10.1 | Worker Nodes | 6 workers |
 | **30** | K3s-MetalLB-PROD | 192.168.30.0/24 | - | LoadBalancer Pool | LoadBalancer IPs |
