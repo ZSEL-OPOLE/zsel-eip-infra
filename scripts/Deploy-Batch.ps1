@@ -31,7 +31,7 @@ param(
     [switch]$DryRun,
 
     [Parameter(Mandatory=$false)]
-    [switch]$CreateIssues = $true
+    [switch]$CreateIssues
 )
 
 # Repository definitions from ROLLOUT-PLAN.md
