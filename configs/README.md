@@ -10,13 +10,13 @@
 
 Ten katalog zawiera **gotowe pliki konfiguracyjne RouterOS (.rsc)** dla wszystkich 5 switchy w infrastrukturze K3s:
 
-| Plik                   | Urządzenie       | Rola                       | Management IP     |
-|------------------------|------------------|----------------------------|-------------------|
-| `core-switch-01.rsc`   | CORE-SWITCH-01   | Core router/gateway        | 192.168.255.1/28  |
-| `access-switch-01.rsc` | ACCESS-SWITCH-01 | Mac Pro 01-03 (masters)    | 192.168.255.11/28 |
-| `access-switch-02.rsc` | ACCESS-SWITCH-02 | Mac Pro 04-06 (workers)    | 192.168.255.12/28 |
-| `access-switch-03.rsc` | ACCESS-SWITCH-03 | Mac Pro 07-09 (workers)    | 192.168.255.13/28 |
-| `access-switch-04.rsc` | ACCESS-SWITCH-04 | Redundancy (backup NICs)   | 192.168.255.14/28 |
+| Plik                   | Urządzenie       | Rola                     | Management IP     |
+|------------------------|------------------|--------------------------|-------------------|
+| `core-switch-01.rsc`   | CORE-SWITCH-01   | Core router/gateway      | 192.168.255.1/28  |
+| `access-switch-01.rsc` | ACCESS-SWITCH-01 | Mac Pro 01-03 (masters)  | 192.168.255.11/28 |
+| `access-switch-02.rsc` | ACCESS-SWITCH-02 | Mac Pro 04-06 (workers)  | 192.168.255.12/28 |
+| `access-switch-03.rsc` | ACCESS-SWITCH-03 | Mac Pro 07-09 (workers)  | 192.168.255.13/28 |
+| `access-switch-04.rsc` | ACCESS-SWITCH-04 | Redundancy (backup NICs) | 192.168.255.14/28 |
 
 ---
 
@@ -144,24 +144,27 @@ Password: ZSE-BCU-2025!SecureP@ss
 
 ### VLAN Configuration
 
-| VLAN ID | Przeznaczenie | Sieć | Gateway |
-|---------|---------------|------|---------|
-| 110 | K3s Cluster | 192.168.10.0/24 | 192.168.10.1 |
-| 600 | Management | 192.168.255.0/28 | 192.168.255.1 |
+| VLAN ID | Przeznaczenie | Sieć             | Gateway       |
+|---------|---------------|------------------|---------------|
+| 110     | K3s Cluster   | 192.168.10.0/24  | 192.168.10.1  |
+| 600     | Management    | 192.168.255.0/28 | 192.168.255.1 |
 
 ### Port Assignments
 
 **CORE-SWITCH-01:**
+
 - `ether1` = WAN (ISP uplink)
 - `ether2` = Management (untagged VLAN 600)
 - `sfp-sfpplus1-4` = Trunk to ACCESS switches (tagged 110, 600)
 
 **ACCESS-SWITCH-01/02/03:**
+
 - `ether1-3` = Mac Pro (untagged VLAN 110)
 - `ether48` = Management (untagged VLAN 600)
 - `sfp-sfpplus1` = Trunk to CORE (tagged 110, 600)
 
 **ACCESS-SWITCH-04:**
+
 - `ether1-9` = Mac Pro backup NICs (untagged VLAN 110)
 - `ether48` = Management (untagged VLAN 600)
 - `sfp-sfpplus1` = Trunk to CORE (tagged 110, 600)
@@ -218,6 +221,7 @@ cd C:\Users\kolod\Desktop\LKP\05_BCU\INFRA\zsel-eip-infra\scripts
 ```
 
 **Co sprawdza:**
+
 - ✅ Dostępność wszystkich 5 switchy (ping test)
 - ✅ Poprawność połączeń trunk (LLDP)
 - ✅ Port mapping (czy właściwe kable w właściwych portach)
