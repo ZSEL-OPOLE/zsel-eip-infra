@@ -33,10 +33,13 @@ jobs:
           path: ./
           extra_args: --only-verified
 
-      - name: GitLeaks Secret Scanner
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # GitLeaks requires a license for organization accounts
+      # Uncomment after obtaining license at gitleaks.io
+      # - name: GitLeaks Secret Scanner
+      #   uses: gitleaks/gitleaks-action@v2
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
   # ═══════════════════════════════════════════════════════════════
   # POWERSHELL SECURITY
