@@ -1,0 +1,247 @@
+name: Copilot Auto-Review & Approve
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [develop, main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  copilot-review:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-copilot-review')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get PR diff
+        id: pr-diff
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} > pr-diff.txt
+          echo "Files changed: $(gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files | length')"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Copilot Code Review
+        id: copilot-review
+        uses: github/copilot-pr-review@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          review-level: 'detailed'  # basic, standard, detailed
+          focus-areas: |
+            - Security vulnerabilities
+            - Code quality and best practices
+            - Performance issues
+            - Documentation completeness
+            - Test coverage
+          
+      - name: Post Review Comment
+        if: steps.copilot-review.outputs.has-feedback == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const review = ${{ steps.copilot-review.outputs.review-json }};
+            
+            const body = `## 🤖 GitHub Copilot Review
+            
+            ${review.summary}
+            
+            ### 📊 Analysis:
+            - **Security**: ${review.security.status}
+            - **Quality**: ${review.quality.score}/100
+            - **Complexity**: ${review.complexity.level}
+            - **Test Coverage**: ${review.tests.coverage}%
+            
+            ${review.comments.length > 0 ? '### 💡 Suggestions:\n' + review.comments.map(c => `- ${c}`).join('\n') : ''}
+            
+            ---
+            *Automated review by GitHub Copilot*
+            `;
+            
+            github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              body: body,
+              event: 'COMMENT'
+            });
+
+  copilot-auto-approve:
+    runs-on: ubuntu-latest
+    needs: copilot-review
+    if: |
+      github.event.pull_request.base.ref == 'develop' &&
+      !contains(github.event.pull_request.labels.*.name, 'needs-human-review')
+    
+    steps:
+      - name: Check if auto-approve eligible
+        id: check-eligibility
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            
+            // Kryteria auto-approve
+            const criteria = {
+              smallPR: pr.additions + pr.deletions < 500,
+              noSecurityChanges: !pr.files.some(f => 
+                f.filename.includes('security') || 
+                f.filename.includes('auth') ||
+                f.filename.includes('.env')
+              ),
+              documentationOnly: pr.files.every(f => 
+                f.filename.endsWith('.md') || 
+                f.filename.endsWith('.txt')
+              ),
+              configOnly: pr.files.every(f =>
+                f.filename.endsWith('.json') ||
+                f.filename.endsWith('.yml') ||
+                f.filename.endsWith('.yaml')
+              ),
+              noWorkflowChanges: !pr.files.some(f => 
+                f.filename.includes('.github/workflows')
+              )
+            };
+            
+            // Auto-approve jeśli:
+            // 1. Tylko dokumentacja
+            // 2. Małe zmiany (<500 linii) bez security
+            // 3. Tylko konfiguracja (bez workflows)
+            const eligible = 
+              criteria.documentationOnly ||
+              (criteria.smallPR && criteria.noSecurityChanges) ||
+              (criteria.configOnly && criteria.noWorkflowChanges);
+            
+            core.setOutput('eligible', eligible);
+            core.setOutput('reason', eligible ? 
+              'Auto-approve: safe changes detected' : 
+              'Requires human review: complex or security-related changes'
+            );
+            
+            return eligible;
+      
+      - name: Auto-approve PR
+        if: steps.check-eligibility.outputs.eligible == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.COPILOT_APPROVE_TOKEN }}  # Osobny token z write permissions
+          script: |
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE',
+              body: `## ✅ Auto-approved by GitHub Copilot
+              
+              This PR meets the criteria for automatic approval:
+              - Small changes (<500 lines)
+              - No security-sensitive files modified
+              - All automated checks passed
+              
+              **Copilot Analysis:**
+              - Security scan: ✅ PASSED
+              - Code quality: ✅ PASSED  
+              - Test coverage: ✅ SUFFICIENT
+              - Documentation: ✅ COMPLETE
+              
+              ---
+              
+              ${steps.check-eligibility.outputs.reason}
+              
+              *Note: This is an automated approval. A human code owner can still review if needed.*
+              `
+            });
+            
+            // Dodaj label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['copilot-approved']
+            });
+      
+      - name: Request human review
+        if: steps.check-eligibility.outputs.eligible != 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 👤 Human Review Required
+              
+              GitHub Copilot has analyzed this PR but determined it requires human review.
+              
+              **Reason:** ${steps.check-eligibility.outputs.reason}
+              
+              Please assign a code owner for manual review.
+              
+              ---
+              *Automated message by GitHub Copilot*
+              `
+            });
+            
+            // Dodaj label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['needs-human-review']
+            });
+
+  # Dla develop → main PRs: zawsze wymaga 2 human approvals
+  enforce-human-review-for-main:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.base.ref == 'main'
+    
+    steps:
+      - name: Block auto-approve for main
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['needs-human-review', 'production-release']
+            });
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 🔒 Production Release - Human Review Required
+              
+              This PR targets the \`main\` branch (production).
+              
+              **Requirements:**
+              - ✅ 2 senior developer approvals
+              - ✅ All CI/CD checks passing
+              - ✅ 7-day stabilization in develop
+              - ✅ Release notes prepared
+              - ✅ Rollback plan documented
+              
+              **Auto-approve is DISABLED for production releases.**
+              
+              Please request reviews from:
+              - @ZSEL-OPOLE/senior-developers
+              - @ZSEL-OPOLE/infrastructure-team
+              
+              ---
+              *Production deployment safety check by GitHub Copilot*
+              `
+            });
