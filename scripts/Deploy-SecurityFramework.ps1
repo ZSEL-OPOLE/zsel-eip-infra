@@ -369,7 +369,7 @@ if (-not (Test-GitHubCLI)) {
 }
 
 # Setup paths
-$sourceRepoPath = $PSScriptRoot  # Assuming script is in zsel-eip-infra
+$sourceRepoPath = Split-Path $PSScriptRoot -Parent  # Go up from scripts/ to repo root
 $targetRepoPath = Join-Path $WorkDir $TargetRepo
 
 Write-ColorOutput "📋 Deployment Configuration:" -Color Yellow
